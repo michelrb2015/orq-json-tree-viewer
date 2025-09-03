@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-gray-50 p-4">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header with controls -->
+    <div class="mb-3 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-gray-900 tracking-tight">
+          Orq Tree Viewer
+        </h1>
+        <p class="text-sm text-gray-500 mt-1">
+          Interactive JSON explorer
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          (click)="expandAll()"
+          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm active:scale-95"
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5h-4m4 0v-4" />
+            </svg>
+            Expand All
+          </span>
+        </button>
+        <button
+          (click)="collapseAll()"
+          class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white rounded-lg border border-gray-300 hover:bg-gray-50 transition-all duration-200 hover:shadow-sm active:scale-95"
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+            Collapse All
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative">
+      <!-- Header row -->
+      <div class="flex bg-gray-50 border-b border-gray-200">
+        <div class="flex-shrink-0 px-2 py-0.5 w-48">
+          <span class="font-semibold text-xs text-gray-700">Path</span>
+        </div>
+        <div class="flex-1 px-2 py-0.5">
+          <span class="font-semibold text-xs text-gray-700">Value</span>
+        </div>
+      </div>
+
+      <!-- Tree view container -->
+      <div class="divide-y divide-gray-100">
+        @for (node of treeNodes(); track node.path) {
+          <div class="group relative">
+            <!-- Node row with reduced height -->
+            <div
+              class="flex hover:bg-blue-50 transition-all duration-300 ease-out min-h-[22px] animate-in fade-in slide-in-from-top-2 items-stretch"
+              [class.cursor-pointer]="node.type === 'object' || node.type === 'array'"
+              [class.bg-blue-100]="hoveredNode() === node.path"
+              [class.scale-[1.01]]="hoveredNode() === node.path"
+              (click)="node.type === 'object' || node.type === 'array' ? toggleNode(node) : null"
+              (mouseenter)="setHoveredNode(node.path)"
+              (mouseleave)="setHoveredNode(null)"
+            >
+              <!-- Left column - Keys with fixed width and truncation -->
+              <div
+                class="flex-shrink-0 px-1.5 py-0.5 flex justify-center flex-col relative w-48"
+              >
+                <!-- Indentation and tree lines -->
+                <div class="flex items-center min-w-0 flex-1">
+                  @if (node.depth > 0) {
+                    @for (guide of getIndentGuides(node); track $index; let i = $index) {
+                      <span
+                        class="inline-block w-4 h-full flex-shrink-0"
+                        [ngClass]="guide"
+                      ></span>
+                    }
+                  }
+
+                  <!-- Expand/collapse icon -->
+                  @if (node.type === 'object' || node.type === 'array') {
+                    <span
+                      class="inline-flex items-center justify-center w-4 h-4 mr-1.5 transition-all duration-300 ease-out flex-shrink-0 hover:scale-110"
+                      [class.rotate-90]="node.isExpanded"
+                    >
+                      <svg class="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                  } @else {
+                    <span class="inline-block w-4 mr-1.5 flex-shrink-0"></span>
+                  }
+
+                  <!-- Key name with truncation -->
+                  <span class="font-mono text-xs text-gray-800 truncate min-w-0" [title]="node.depth === 0 ? 'data' : node.key">
+                    @if (node.depth === 0) {
+                      <span class="font-semibold">data</span>
+                    } @else {
+                      {{ node.key }}
+                    }
+                  </span>
+
+                </div>
+              </div>
+
+              <!-- Right column - Values -->
+              <div class="flex-1 px-1.5 py-0.5 flex items-center justify-between min-w-0">
+                <span
+                  class="font-mono text-xs pr-1.5 whitespace-pre-wrap break-words"
+                  [ngClass]="getValueColor(node.type)"
+                >
+                  @if (node.type === 'object' || node.type === 'array') {
+                    <span class="text-xs text-gray-500 font-mono italic">
+                      {{ getItemCount(node.value) }}
+                    </span>
+                    <span [ngClass]="getTypeBadgeClass(node.type)" class="px-0.5 py-0">
+                      {{ getTypeLabel(node.type) }}
+                    </span>
+                  } @else {
+                    {{ node.formattedValue || node.value }}
+                  }
+                </span>
+
+                <!-- Copy button (appears on hover) -->
+                <button
+                  (click)="copyValue(node, $event)"
+                  class="opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out p-1 rounded-md hover:bg-gray-100 hover:scale-110 active:scale-95 flex-shrink-0"
+                  [class.opacity-100]="hoveredNode() === node.path"
+                  [class.!bg-green-100]="copiedNode() === node.path"
+                >
+                  @if (copiedNode() === node.path) {
+                    <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  } @else {
+                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .dark\:bg-gray-750 {
+    @apply dark:bg-gray-700/50;
+  }
+  
+  .dark\:hover\:bg-gray-750:hover {
+    @apply dark:hover:bg-gray-700/50;
+  }
+  
+  .dark\:bg-blue-950 {
+    @apply dark:bg-blue-900/20;
+  }
+}

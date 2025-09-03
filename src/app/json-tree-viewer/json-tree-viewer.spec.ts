@@ -272,7 +272,6 @@ describe('JsonTreeViewer', () => {
     beforeEach(() => {
       spyOn(component['treeService'], 'getValueColor').and.returnValue('text-green-600');
       spyOn(component['treeService'], 'getItemCountText').and.returnValue('5 items');
-      spyOn(component['treeService'], 'getIndentGuides').and.returnValue(['border-l', '']);
       spyOn(component['treeService'], 'getTypeLabel').and.returnValue('{ }');
       spyOn(component['treeService'], 'getTypeBadgeClass').and.returnValue('inline-flex items-center bg-amber-50');
     });
@@ -294,20 +293,6 @@ describe('JsonTreeViewer', () => {
       expect(component['treeService'].getItemCountText).toHaveBeenCalledWith(0);
     });
 
-    it('should delegate getIndentGuides to service', () => {
-      const node: TreeNode = {
-        key: 'test',
-        value: 0,
-        type: 'string',
-        depth: 2,
-        path: 'root.test',
-        parentIsLast: [false, true]
-      };
-      
-      const result = component.getIndentGuides(node);
-      expect(component['treeService'].getIndentGuides).toHaveBeenCalledWith(node);
-      expect(result).toEqual(['border-l', '']);
-    });
 
     it('should delegate getTypeLabel to service', () => {
       const result = component.getTypeLabel('object');

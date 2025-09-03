@@ -76,14 +76,6 @@ export class JsonTreeViewerService {
     return count === 1 ? '1 item' : `${count} items`;
   }
 
-  getIndentGuides(node: TreeNode): string[] {
-    const guides: string[] = [];
-    // Don't show any guides - return empty strings for spacing
-    for (let i = 0; i < node.depth; i++) {
-      guides.push('');
-    }
-    return guides;
-  }
 
   private createNodes(
     key: string,

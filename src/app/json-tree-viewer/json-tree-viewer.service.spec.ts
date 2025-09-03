@@ -202,22 +202,6 @@ describe('JsonTreeViewerService', () => {
     });
   });
 
-  describe('getIndentGuides', () => {
-    it('should return empty array for root node', () => {
-      const node = { depth: 0, parentIsLast: [] } as any;
-      expect(service.getIndentGuides(node)).toEqual([]);
-    });
-
-    it('should return guides based on depth', () => {
-      const node = { depth: 3, parentIsLast: [false, false, true] } as any;
-      const guides = service.getIndentGuides(node);
-      
-      expect(guides.length).toBe(3);
-      expect(guides[0]).toBe('border-l');
-      expect(guides[1]).toBe('border-l');
-      expect(guides[2]).toBe('');
-    });
-  });
 
   describe('edge cases', () => {
     it('should handle empty objects', () => {

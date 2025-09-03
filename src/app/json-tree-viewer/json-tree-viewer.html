@@ -55,10 +55,10 @@
             <!-- Node row with reduced height -->
             <div
               class="flex hover:bg-blue-50 transition-all duration-300 ease-out min-h-[22px] animate-in fade-in slide-in-from-top-2 items-stretch"
-              [class.cursor-pointer]="node.type === 'object' || node.type === 'array'"
+              [class.cursor-pointer]="isNodeClickable(node)"
               [class.bg-blue-100]="hoveredNode() === node.path"
               [class.scale-[1.01]]="hoveredNode() === node.path"
-              (click)="node.type === 'object' || node.type === 'array' ? toggleNode(node) : null"
+              (click)="isNodeClickable(node) ? toggleNode(node) : null"
               (mouseenter)="setHoveredNode(node.path)"
               (mouseleave)="setHoveredNode(null)"
             >
@@ -66,19 +66,11 @@
               <div
                 class="flex-shrink-0 px-1.5 py-0.5 flex justify-center flex-col relative w-48"
               >
-                <!-- Indentation and tree lines -->
-                <div class="flex items-center min-w-0 flex-1">
-                  @if (node.depth > 0) {
-                    @for (guide of getIndentGuides(node); track $index; let i = $index) {
-                      <span
-                        class="inline-block w-4 h-full flex-shrink-0"
-                        [ngClass]="guide"
-                      ></span>
-                    }
-                  }
+                <!-- Indentation -->
+                <div class="flex items-center min-w-0 flex-1" [style.padding-left]="getNodePaddingLeft(node.depth)">
 
                   <!-- Expand/collapse icon -->
-                  @if (node.type === 'object' || node.type === 'array') {
+                  @if (isNodeClickable(node)) {
                     <span
                       class="inline-flex items-center justify-center w-4 h-4 mr-1.5 transition-all duration-300 ease-out flex-shrink-0 hover:scale-110"
                       [class.rotate-90]="node.isExpanded"
@@ -92,8 +84,8 @@
                   }
 
                   <!-- Key name with truncation -->
-                  <span class="font-mono text-xs text-gray-800 truncate min-w-0" [title]="node.depth === 0 ? 'data' : node.key">
-                    @if (node.depth === 0) {
+                  <span class="font-mono text-xs text-gray-800 truncate min-w-0" [title]="getNodeKeyText(node)">
+                    @if (isRootNode(node)) {
                       <span class="font-semibold">data</span>
                     } @else {
                       {{ node.key }}
@@ -109,15 +101,10 @@
                   class="font-mono text-xs pr-1.5 whitespace-pre-wrap break-words"
                   [ngClass]="getValueColor(node.type)"
                 >
-                  @if (node.type === 'object' || node.type === 'array') {
-                    <span class="text-xs text-gray-500 font-mono italic">
-                      {{ getItemCount(node.value) }}
-                    </span>
-                    <span [ngClass]="getTypeBadgeClass(node.type)" class="px-0.5 py-0">
-                      {{ getTypeLabel(node.type) }}
-                    </span>
+                  @if (isNodeClickable(node)) {
+                    <span class="text-xs text-gray-500 font-mono italic">{{ getItemCount(node.value) }}</span><span [ngClass]="getTypeBadgeClass(node.type)" class="px-0.5 py-0 ml-1">{{ getTypeLabel(node.type) }}</span>
                   } @else {
-                    {{ node.formattedValue || node.value }}
+                    <span>{{ node.formattedValue || node.value }}</span>
                   }
                 </span>
 
@@ -126,9 +113,9 @@
                   (click)="copyValue(node, $event)"
                   class="opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out p-1 rounded-md hover:bg-gray-100 hover:scale-110 active:scale-95 flex-shrink-0"
                   [class.opacity-100]="hoveredNode() === node.path"
-                  [class.!bg-green-100]="copiedNode() === node.path"
+                  [class.!bg-green-100]="isCopySuccess(node.path)"
                 >
-                  @if (copiedNode() === node.path) {
+                  @if (isCopySuccess(node.path)) {
                     <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>

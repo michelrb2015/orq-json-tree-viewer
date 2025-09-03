@@ -13,6 +13,5 @@ export interface TreeNode {
   path: string;
   isExpanded?: boolean;
   children?: TreeNode[];
-  isLast?: boolean;
   parentIsLast?: boolean[];
 }

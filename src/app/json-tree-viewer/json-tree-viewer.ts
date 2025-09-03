@@ -8,7 +8,6 @@ import { JsonTreeViewerService } from './json-tree-viewer.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './json-tree-viewer.html',
-  styleUrl: './json-tree-viewer.scss',
   providers: [JsonTreeViewerService]
 })
 export class JsonTreeViewer {
@@ -26,6 +25,26 @@ export class JsonTreeViewer {
   treeNodes = computed(() => {
     return this.treeService.buildTree(this._data(), this.expandedNodes());
   });
+
+  getNodePaddingLeft(depth: number): string {
+    return `${depth * 1}rem`;
+  }
+
+  isNodeClickable(node: TreeNode): boolean {
+    return node.type === 'object' || node.type === 'array';
+  }
+
+  getNodeKeyText(node: TreeNode): string {
+    return node.depth === 0 ? 'data' : node.key;
+  }
+
+  isRootNode(node: TreeNode): boolean {
+    return node.depth === 0;
+  }
+
+  isCopySuccess(nodePath: string): boolean {
+    return this.copiedNode() === nodePath;
+  }
 
   toggleNode(node: TreeNode): void {
     const expanded = new Set(this.expandedNodes());
@@ -82,9 +101,6 @@ export class JsonTreeViewer {
     return this.treeService.getItemCountText(typeof count === 'number' ? count : 0);
   }
 
-  getIndentGuides(node: TreeNode): string[] {
-    return this.treeService.getIndentGuides(node);
-  }
 
   getTypeLabel(type: TreeNode['type']): string {
     return this.treeService.getTypeLabel(type);
